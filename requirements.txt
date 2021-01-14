@@ -2,3 +2,4 @@ requests
 pandas
 datetime
 timedelta
+requests_cache
