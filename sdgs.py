@@ -46,10 +46,10 @@ params = {
 response = requests.get(url, headers = headers, params = params)
 #print(json.dumps(response.json(), indent = 2))
 
-if response.from_cache == True:
-    print("Booptie do da I am from Cache!!!!!")
-else:
-    print("UH OH!! NEW REQUEST!")
+#if response.from_cache == True:
+#    print("Booptie do da I am from Cache!!!!!")
+#else:
+#    print("UH OH!! NEW REQUEST!")
 
 sdg_array = []
    
@@ -90,7 +90,7 @@ for sdg_goal in all_sdg_goals:
 result = []
 
 for k, v in final_result_dict.items():
-    result.append({'Goal': k, 'Volume': v})
+    result.append({'name': k, 'y': v})
 
 print(json.dumps(result))
 
