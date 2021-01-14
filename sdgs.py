@@ -13,7 +13,7 @@ import csv
 from datetime import datetime, timedelta
 import requests_cache
 
-requests_cache.install_cache(cache_name='sdgs_cache', backend='sqlite', expire_after=180)
+requests_cache.install_cache(cache_name='sdgs_cache', backend='sqlite', expire_after=43200)
 
 #url = "https://api.truvaluelabs.com/v2/sdg/orgs/spotlights"
 url = "https://api.truvaluelabs.com/v2/sdg/orgs/scores"
