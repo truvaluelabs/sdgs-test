@@ -1,13 +1,10 @@
 const express = require('express')
-const request = require('request');
 const { spawn } = require('child_process')
+const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  next();
-});
+app.use(cors())
 
 app.get('/', (req, res) => {
   let dataToSend
