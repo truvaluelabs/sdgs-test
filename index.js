@@ -1,12 +1,15 @@
 const express = require('express')
+const request = require('request');
 const { spawn } = require('child_process')
-const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
 
-app.use(cors())
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+});
 
-app.get('/', (req, res) => {
+app.get('/', (req, res, next) => {
   let dataToSend
   let largeDataSet = []
   // spawn new child process to call the python script
