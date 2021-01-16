@@ -9,11 +9,12 @@ import requests
 import pandas as pd   
 import requests
 import json
-import csv
 from datetime import datetime, timedelta
 import requests_cache
+from functools import lru_cache
 
-requests_cache.install_cache(cache_name='sdgs_cache', backend='sqlite', expire_after=43200)
+requests_cache.install_cache(cache_name='sdgs_cache', backend='sqlite', expire_after=180)
+requests_cache.remove_expired_responses()
 
 #url = "https://api.truvaluelabs.com/v2/sdg/orgs/spotlights"
 url = "https://api.truvaluelabs.com/v2/sdg/orgs/scores"
@@ -43,54 +44,54 @@ params = {
   "categories": all_sdg_goals_str,    
   "types": "ttmVolume"
 }
+
 response = requests.get(url, headers = headers, params = params)
 #print(json.dumps(response.json(), indent = 2))
 
-#if response.from_cache == True:
-#    print("Booptie do da I am from Cache!!!!!")
-#else:
-#    print("UH OH!! NEW REQUEST!")
+@lru_cache
+def calcVolume():
 
-sdg_array = []
-   
-sdg_dict_all = {}
-for sdg_goal in all_sdg_goals:
-    sdg_dict_all[ sdg_goal ] = 0
- 
-for row in response.json()[ 'data' ]:  
-    scores = row[ 'scores'][ 0 ]
+    sdg_array = []
 
-    #for scores in row[ 'scores' ]:
-    #print( row ) 
-    sdg_dict = {}
-    sdg_dict[ 'orgTvlId '] = row[ 'orgTvlId']
-    sdg_dict[ 'orgName ']  = row[ 'orgName']
-        
+    sdg_dict_all = {}
     for sdg_goal in all_sdg_goals:
-        #print( scores[ 'ttmVolume' ][ 'Goal1NoPoverty'] )
-        #dynamic_impact = scores[ 'ttmVolume' ][ sdg_goal ] / sum(scores[ 'ttmVolume' ].values()) * 100
-        #sdg_dict[ sdg_goal ] = scores[ 'dynamicMateriality' ][ sdg_goal ]        
-        sdg_dict_all[ sdg_goal ] += scores[ 'ttmVolume' ][ sdg_goal ]
-        
-    sdg_array.append( sdg_dict )
+        sdg_dict_all[ sdg_goal ] = 0
 
-#print( sdg_array )
-#print( sdg_dict_all )
+    for row in response.json()[ 'data' ]:  
+        scores = row[ 'scores'][ 0 ]
 
-final_result_dict = {}
-total_ttmVolume = sum(sdg_dict_all.values())
+        #for scores in row[ 'scores' ]:
+        #print( row ) 
+        sdg_dict = {}
+        sdg_dict[ 'orgTvlId '] = row[ 'orgTvlId']
+        sdg_dict[ 'orgName ']  = row[ 'orgName']
 
-for sdg_goal in all_sdg_goals:
-    final_result_dict[ sdg_goal ] = (sdg_dict_all[ sdg_goal ] / total_ttmVolume) * 100
+        for sdg_goal in all_sdg_goals:
+            #print( scores[ 'ttmVolume' ][ 'Goal1NoPoverty'] )
+            #dynamic_impact = scores[ 'ttmVolume' ][ sdg_goal ] / sum(scores[ 'ttmVolume' ].values()) * 100
+            #sdg_dict[ sdg_goal ] = scores[ 'dynamicMateriality' ][ sdg_goal ]        
+            sdg_dict_all[ sdg_goal ] += scores[ 'ttmVolume' ][ sdg_goal ]
 
-#In Percentage Points (i.e. Dynamic Impact %)
-#print( final_result_dict )
-#print( sum(final_result_dict.values())) #sanity check it all adds up to 100%..
+        sdg_array.append( sdg_dict )
 
-result = []
+    #print( sdg_array )
+    #print( sdg_dict_all )
 
-for k, v in final_result_dict.items():
-    result.append({'name': k, 'y': v})
+    final_result_dict = {}
+    total_ttmVolume = sum(sdg_dict_all.values())
 
-print(json.dumps(result))
+    for sdg_goal in all_sdg_goals:
+        final_result_dict[ sdg_goal ] = (sdg_dict_all[ sdg_goal ] / total_ttmVolume) * 100
 
+    #In Percentage Points (i.e. Dynamic Impact %)
+    #print( final_result_dict )
+    #print( sum(final_result_dict.values())) #sanity check it all adds up to 100%..
+
+    result = []
+
+    for k, v in final_result_dict.items():
+        result.append({'name': k, 'y': v})
+
+    print(json.dumps(result))
+    
+calcVolume()
